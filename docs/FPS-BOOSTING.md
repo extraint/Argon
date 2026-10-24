@@ -2,7 +2,25 @@
 
 Argon is a Fabric 26.2 add-on for [Sodium](https://modrinth.com/mod/sodium). Sodium does the heavy lifting (terrain rendering, chunk building, its own entity culling); Argon trims the work Sodium leaves alone and gives you one-click settings that cut GPU and CPU load.
 
-**What to expect:** in ordinary terrain Argon changes little. In heavy scenes (item piles, chest-filled rooms, particle storms) a software-rendered test showed roughly 20-30% more FPS. See [BENCHMARK.md](BENCHMARK.md) for the numbers and their limits. Presets and render distance are where large gains usually come from, because they remove work entirely.
+**What to expect:** see the percentages below. In heavy scenes (item piles, chest-filled rooms, particle storms) a software-rendered test showed roughly 20-30% more FPS. See [BENCHMARK.md](BENCHMARK.md) for the numbers and their limits. Presets and render distance are where large gains usually come from, because they remove work entirely.
+
+## How much does it boost FPS?
+
+There is no single percentage: it depends entirely on the scene. Measured in an A/B test (Argon off vs on, same world, Sodium 0.9.2, Minecraft 26.2, **software rendering with no GPU**):
+
+| Scene | Fixed limits | Defaults (with adaptive) |
+| --- | ---: | ---: |
+| 630 dropped items near the camera | **+20%** | **+32%** |
+| 793 chests, 50-69 blocks away | **+27%** | **+23%** |
+| 300 particles per tick | **+20%** | **+22%** |
+| 400 cows in view | no real change (-5% to +3%, within noise) | no real change |
+
+- **Best case measured: about +20% to +30%**, in deliberately heavy scenes.
+- **Normal play (ordinary terrain, few entities): not measured**, and expected to be small, because the features only skip work that is rare in normal scenes.
+- Run-to-run spread was about +/-10%, so treat these as rough. A real GPU may give different results.
+- Most of the "big" FPS gains in practice come from Sodium itself and from lowering render distance and video settings (see the presets), not from culling.
+
+Full methodology and raw numbers: [docs/BENCHMARK.md](BENCHMARK.md).
 
 ## Quick start
 

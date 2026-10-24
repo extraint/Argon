@@ -19,8 +19,26 @@ Sodium already speeds up terrain rendering and chunk building; Argon targets the
 | Translucency sorting | "Fast" turns off Sodium's translucent quad splitting, saving CPU on water and glass-heavy scenes at the cost of occasional sorting glitches. In memory only. |
 | Sodium chunk threads | Optional in-memory override of Sodium's chunk builder thread count. Sodium's own config file is never touched. |
 
-Gains depend on the scene. In a software-rendered A/B test, item piles, chest-heavy rooms and particle storms gained roughly 20-30%, a large mob herd did not change, and ordinary terrain is unaffected. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
+Gains depend on the scene. In a software-rendered A/B test, item piles, chest-heavy rooms and particle storms gained roughly 20-30% and a large mob herd did not change; ordinary terrain was not measured. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
 Run `/argon status` to see how much work Argon has skipped.
+
+## How much does it boost FPS?
+
+There is no single percentage: it depends entirely on the scene. Measured in an A/B test (Argon off vs on, same world, Sodium 0.9.2, Minecraft 26.2, **software rendering with no GPU**):
+
+| Scene | Fixed limits | Defaults (with adaptive) |
+| --- | ---: | ---: |
+| 630 dropped items near the camera | **+20%** | **+32%** |
+| 793 chests, 50-69 blocks away | **+27%** | **+23%** |
+| 300 particles per tick | **+20%** | **+22%** |
+| 400 cows in view | no real change (-5% to +3%, within noise) | no real change |
+
+- **Best case measured: about +20% to +30%**, in deliberately heavy scenes.
+- **Normal play (ordinary terrain, few entities): not measured**, and expected to be small, because the features only skip work that is rare in normal scenes.
+- Run-to-run spread was about +/-10%, so treat these as rough. A real GPU may give different results.
+- Most of the "big" FPS gains in practice come from Sodium itself and from lowering render distance and video settings (see the presets), not from culling.
+
+Full methodology and raw numbers: [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
 ## Config
 

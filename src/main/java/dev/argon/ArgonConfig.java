@@ -30,6 +30,15 @@ public final class ArgonConfig {
 	public boolean blockEntityCulling = true;
 	public int blockEntityDistance = 48;
 
+	/** Cap how many small entities (items, XP orbs, arrows, armor stands) are drawn per frame. 0 disables the cap. */
+	public int maxSmallEntitiesPerFrame = 256;
+
+	/** Shrink the culling distances and particle cap automatically while FPS is below {@link #targetFps}. */
+	public boolean adaptiveCulling = true;
+	public int targetFps = 60;
+	/** Lowest fraction of the configured distances adaptive culling may shrink to. */
+	public double adaptiveMinScale = 0.5;
+
 	/** Cap how many particles may be spawned per client tick. 0 disables the cap. */
 	public boolean particleLimiter = true;
 	public int maxParticlesPerTick = 150;
@@ -70,6 +79,9 @@ public final class ArgonConfig {
 		entityDistance = Math.clamp(entityDistance, 16, 512);
 		smallEntityDistance = Math.clamp(smallEntityDistance, 8, entityDistance);
 		blockEntityDistance = Math.clamp(blockEntityDistance, 16, 512);
+		maxSmallEntitiesPerFrame = Math.clamp(maxSmallEntitiesPerFrame, 0, 5_000);
+		targetFps = Math.clamp(targetFps, 20, 360);
+		adaptiveMinScale = Math.clamp(adaptiveMinScale, 0.2, 1.0);
 		maxParticlesPerTick = Math.clamp(maxParticlesPerTick, 0, 10_000);
 		sodiumChunkBuilderThreads = Math.clamp(sodiumChunkBuilderThreads, 0, 64);
 	}

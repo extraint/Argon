@@ -1,0 +1,9 @@
+{
+	"schemaVersion": 1,
+	"id": "argon-gametest",
+	"version": "1.0.0",
+	"name": "Argon Game Tests",
+	"environment": "client",
+	"entrypoints": { "fabric-client-gametest": ["dev.argon.test.ArgonClientGameTest"] },
+	"depends": { "argon": "*" }
+}

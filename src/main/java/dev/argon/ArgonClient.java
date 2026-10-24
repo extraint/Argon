@@ -35,11 +35,13 @@ public class ArgonClient implements ClientModInitializer {
 				context.getSource().sendFeedback(Component.literal(
 					"Argon skipped this session: " + ArgonStats.ENTITIES_CULLED.sum() + " entity renders, "
 						+ ArgonStats.BLOCK_ENTITIES_CULLED.sum() + " block entity renders, "
-						+ ArgonStats.PARTICLES_DROPPED.sum() + " particles"));
+						+ ArgonStats.PARTICLES_DROPPED.sum() + " particles. Adaptive culling scale: "
+						+ Math.round(Adaptive.scale() * 100) + "%"));
 				return 1;
 			}))
 			.then(ClientCommands.literal("reload").executes(context -> {
 				ArgonConfig.load();
+				Adaptive.reset();
 				applyTuning();
 				context.getSource().sendFeedback(Component.literal("Argon config reloaded"));
 				return 1;

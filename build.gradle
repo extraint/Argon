@@ -31,6 +31,16 @@ dependencies {
 	localRuntime "maven.modrinth:modmenu:${project.modmenu_version}"
 }
 
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = 'argon-gametest'
+		enableClientGameTests = true
+		eula = true
+		clearRunDirectory = true
+	}
+}
+
 processResources {
 	inputs.property 'version', project.version
 	filesMatching('fabric.mod.json') {

@@ -46,9 +46,16 @@ public class ArgonConfigScreen extends Screen {
 		addToggle(right, y, "Particle Limiter", config.particleLimiter, v -> config.particleLimiter = v);
 		y += ROW_HEIGHT;
 
+		addToggle(left, y, "Adaptive Culling", config.adaptiveCulling, v -> config.adaptiveCulling = v);
+		addSlider(right, y, "Target FPS", 30, 240, config.targetFps, String::valueOf, v -> config.targetFps = v);
+		y += ROW_HEIGHT;
+
+		addSlider(left, y, "Small Entity Budget", 0, 1000, config.maxSmallEntitiesPerFrame, v -> v == 0 ? "Off" : String.valueOf(v), v -> config.maxSmallEntitiesPerFrame = v);
+		addSlider(right, y, "Particles Per Tick", 10, 1000, config.maxParticlesPerTick, String::valueOf, v -> config.maxParticlesPerTick = v);
+		y += ROW_HEIGHT;
+
 		addSlider(left, y, "Sodium Chunk Threads", 0, Math.max(2, Runtime.getRuntime().availableProcessors()), config.sodiumChunkBuilderThreads,
 			v -> v == 0 ? "Auto" : String.valueOf(v), v -> config.sodiumChunkBuilderThreads = v);
-		addSlider(right, y, "Particles Per Tick", 10, 1000, config.maxParticlesPerTick, String::valueOf, v -> config.maxParticlesPerTick = v);
 
 		addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
 			.bounds(this.width / 2 - 100, this.height - 28, 200, 20)

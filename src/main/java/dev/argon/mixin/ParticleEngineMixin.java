@@ -1,5 +1,6 @@
 package dev.argon.mixin;
 
+import dev.argon.Adaptive;
 import dev.argon.ArgonConfig;
 import dev.argon.ArgonStats;
 import net.minecraft.client.particle.Particle;
@@ -26,7 +27,8 @@ public class ParticleEngineMixin {
 	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
 	private void argon$limitSpawnRate(ParticleOptions options, double x, double y, double z, double dx, double dy, double dz, CallbackInfoReturnable<Particle> cir) {
 		ArgonConfig config = ArgonConfig.get();
-		if (config.particleLimiter && config.maxParticlesPerTick > 0 && ++this.argon$spawnedThisTick > config.maxParticlesPerTick) {
+		if (config.particleLimiter && config.maxParticlesPerTick > 0
+			&& ++this.argon$spawnedThisTick > Math.max(10, (int) (config.maxParticlesPerTick * Adaptive.scale()))) {
 			ArgonStats.PARTICLES_DROPPED.increment();
 			cir.setReturnValue(null);
 		}

@@ -3,6 +3,8 @@
 A client-side Fabric mod for **Minecraft 26.2** that adds extra performance work on top of [Sodium](https://modrinth.com/mod/sodium).
 Sodium already speeds up terrain rendering and chunk building; Argon targets the parts it leaves alone.
 
+**New here?** Read the [FPS boosting guide](docs/FPS-BOOSTING.md) for what each option does, preset values and tuning tips.
+
 ## What it does
 
 | Feature | Effect |

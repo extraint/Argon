@@ -6,6 +6,7 @@
 	"description": "Client-side performance add-on for Sodium: smarter culling, throttled particles and ambient updates, and chunk-loading tuning.",
 	"authors": ["Argon contributors"],
 	"license": "MIT",
+	"icon": "assets/argon/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": ["dev.argon.ArgonClient"],

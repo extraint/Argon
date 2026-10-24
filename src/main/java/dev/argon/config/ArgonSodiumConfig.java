@@ -38,7 +38,9 @@ public class ArgonSodiumConfig implements ConfigEntryPoint {
 	@Override
 	public void registerConfigLate(ConfigBuilder builder) {
 		ModOptionsBuilder mod = builder.registerOwnModOptions()
-			.setColorTheme(builder.createColorTheme().setBaseThemeRGB(0x9B5DE5));
+			.setColorTheme(builder.createColorTheme().setBaseThemeRGB(0x9B5DE5))
+			// The icon is full colour, so don't let Sodium tint it with the theme colour.
+			.setNonTintedIcon(id("textures/gui/icon.png"));
 
 		mod.addPage(culling(builder));
 		mod.addPage(adaptive(builder));

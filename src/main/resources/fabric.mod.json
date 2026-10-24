@@ -9,7 +9,8 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": ["dev.argon.ArgonClient"],
-		"modmenu": ["dev.argon.gui.ArgonModMenu"]
+		"modmenu": ["dev.argon.gui.ArgonModMenu"],
+		"sodium:config_api_user": ["dev.argon.config.ArgonSodiumConfig"]
 	},
 	"mixins": ["argon.mixins.json"],
 	"depends": {

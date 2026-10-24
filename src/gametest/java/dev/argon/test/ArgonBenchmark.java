@@ -21,6 +21,9 @@ public class ArgonBenchmark implements FabricClientGameTest {
 	private static final int SETTLE_TICKS = 60;
 	private static final int MEASURE_TICKS = 120;
 	private static final int ROUNDS = 3;
+	private static final int RENDER_DISTANCE = 12;
+	private static final int WORLD_WARMUP_TICKS = 300;
+	private static final String NORMAL_SEED = "argon-bench";
 
 	private enum Mode { OFF, STATIC, FULL }
 
@@ -36,37 +39,56 @@ public class ArgonBenchmark implements FabricClientGameTest {
 		}
 		ArgonConfig.load();
 
+		// Heavy synthetic scenes on a superflat world.
 		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
-			this.world = singleplayer;
-			context.runOnClient(client -> {
-				client.options.enableVsync().set(false);
-				client.options.framerateLimit().set(260);
-				client.options.inactivityFpsLimit().set(InactivityFpsLimit.MINIMIZED);
-			});
-			cmd("gamemode spectator @s");
-			cmd("tp @s ~ ~ ~ 0 0");
+			runWorld(context, singleplayer, flatScenarios());
+		}
+
+		// Ordinary generated terrain with its natural trees, animals and structures: the case most players actually play.
+		try (TestSingleplayerContext singleplayer = context.worldBuilder()
+			.setUseConsistentSettings(false)
+			.adjustSettings(state -> {
+				state.setSeed(NORMAL_SEED);
+				state.setWorldType(state.getNormalPresetList().get(0));
+			})
+			.create()) {
+			runWorld(context, singleplayer, normalScenarios());
+		}
+	}
+
+	private void runWorld(ClientGameTestContext context, TestSingleplayerContext singleplayer, List<Scenario> scenarios) {
+		this.world = singleplayer;
+		context.runOnClient(client -> {
+			client.options.enableVsync().set(false);
+			client.options.framerateLimit().set(260);
+			client.options.inactivityFpsLimit().set(InactivityFpsLimit.MINIMIZED);
+			client.options.renderDistance().set(RENDER_DISTANCE);
+		});
+		cmd("gamemode spectator @s");
+		cmd("tp @s ~ ~ ~ 0 0");
+		// Let the surrounding chunks generate and mesh before measuring anything.
+		context.waitTicks(WORLD_WARMUP_TICKS);
+		context.takeScreenshot("bench-world-" + scenarios.get(0).name);
+
+		for (Scenario scenario : scenarios) {
+			scenario.setup.run();
 			context.waitTicks(60);
+			List<List<Double>> results = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-			for (Scenario scenario : scenarios()) {
-				scenario.setup.run();
-				context.waitTicks(60);
-				List<List<Double>> results = List.of(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-
-				for (int round = 0; round < ROUNDS; round++) {
-					for (int i = 0; i < Mode.values().length; i++) {
-						Mode mode = Mode.values()[(i + round) % Mode.values().length];
-						double fps = measure(context, scenario, mode);
-						results.get(mode.ordinal()).add(fps);
-						System.out.printf("ARGON-BENCH scenario=%s mode=%s round=%d fps=%.2f scale=%.2f%n",
-							scenario.name, mode, round, fps, Adaptive.scale());
-					}
+			for (int round = 0; round < ROUNDS; round++) {
+				for (int i = 0; i < Mode.values().length; i++) {
+					Mode mode = Mode.values()[(i + round) % Mode.values().length];
+					double fps = measure(context, scenario, mode);
+					results.get(mode.ordinal()).add(fps);
+					System.out.printf("ARGON-BENCH scenario=%s mode=%s round=%d fps=%.2f scale=%.2f%n",
+						scenario.name, mode, round, fps, Adaptive.scale());
 				}
-				for (Mode mode : Mode.values()) {
-					System.out.printf("ARGON-BENCH-MEDIAN scenario=%s mode=%s fps=%.2f%n", scenario.name, mode, median(results.get(mode.ordinal())));
-				}
-				scenario.teardown.run();
-				context.waitTicks(40);
 			}
+			for (Mode mode : Mode.values()) {
+				System.out.printf("ARGON-BENCH-MEDIAN scenario=%s mode=%s fps=%.2f%n", scenario.name, mode, median(results.get(mode.ordinal())));
+			}
+			scenario.teardown.run();
+			context.waitTicks(40);
 		}
 	}
 
@@ -102,7 +124,7 @@ public class ArgonBenchmark implements FabricClientGameTest {
 		config.adaptiveCulling = mode == Mode.FULL;
 	}
 
-	private List<Scenario> scenarios() {
+	private List<Scenario> flatScenarios() {
 		return List.of(
 			new Scenario("cow-herd", this::spawnCows, null, () -> cmd("kill @e[type=!minecraft:player]")),
 			new Scenario("item-pile", this::spawnItems, null, () -> cmd("kill @e[type=!minecraft:player]")),
@@ -110,6 +132,11 @@ public class ArgonBenchmark implements FabricClientGameTest {
 				() -> cmd("fill ~-30 ~ ~50 ~30 ~ ~62 minecraft:air")),
 			new Scenario("particle-storm", () -> { }, () -> cmd("particle minecraft:flame ~ ~1 ~8 5 2 5 0.01 300 force"), () -> { })
 		);
+	}
+
+	/** The camera spins 4 degrees per tick so every direction (and whatever is in it) is sampled equally. */
+	private List<Scenario> normalScenarios() {
+		return List.of(new Scenario("normal-terrain", () -> { }, () -> cmd("tp @s ~ ~ ~ ~4 0"), () -> { }));
 	}
 
 	private void spawnCows() {

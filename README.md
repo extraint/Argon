@@ -19,30 +19,30 @@ Sodium already speeds up terrain rendering and chunk building; Argon targets the
 | Translucency sorting | "Fast" turns off Sodium's translucent quad splitting, saving CPU on water and glass-heavy scenes at the cost of occasional sorting glitches. In memory only. |
 | Sodium chunk threads | Optional in-memory override of Sodium's chunk builder thread count. Sodium's own config file is never touched. |
 
-Gains depend on the scene. In a software-rendered A/B test, item piles, chest-heavy rooms and particle storms gained roughly 20-30% and a large mob herd did not change; ordinary terrain was not measured. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
+Gains depend on the scene. In software-rendered A/B tests, item piles, chest-heavy rooms and particle storms gained roughly 20-45%, while a large mob herd and ordinary generated terrain showed no measurable change. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
 Run `/argon status` to see how much work Argon has skipped.
 
 ## How much does it boost FPS?
 
-There is no single percentage: it depends entirely on the scene. Measured in an A/B test (Argon off vs on, same world, Sodium 0.9.2, Minecraft 26.2, **software rendering with no GPU**):
+There is no single percentage: it depends entirely on the scene. Measured in A/B tests (Argon off vs on, same world, Sodium 0.9.2, Minecraft 26.2, **software rendering with no GPU**, two separate runs):
 
-| Scene | Fixed limits | Defaults (with adaptive) |
+| Scene | Fixed limits (run 1 / run 2) | Defaults with adaptive (run 1 / run 2) |
 | --- | ---: | ---: |
-| 630 dropped items near the camera | **+20%** | **+32%** |
-| 793 chests, 50-69 blocks away | **+27%** | **+23%** |
-| 300 particles per tick | **+20%** | **+22%** |
-| 400 cows in view | no real change (-5% to +3%, within noise) | no real change |
+| **Normal generated terrain** (forest, camera spinning) | **no change** (-4% to +1%) | **no change** |
+| 630 dropped items near the camera | +20% / +42% | +32% / +45% |
+| 793 chests, 50-69 blocks away | +27% / +28% | +23% / +31% |
+| 300 particles per tick | +20% / +20% | +22% / +27% |
+| 400 cows in view | within noise (-5% to +3%) | +3% / +9% |
 
-- **Best case measured: about +20% to +30%**, in deliberately heavy scenes.
-- **Normal play (ordinary terrain, few entities): not measured**, and expected to be small, because the features only skip work that is rare in normal scenes.
-- Run-to-run spread was about +/-10%, so treat these as rough. A real GPU may give different results.
-- Most of the "big" FPS gains in practice come from Sodium itself and from lowering render distance and video settings (see the presets), not from culling.
+- **In normal terrain Argon made no measurable difference.** There is little for it to skip, and the test was bound by software rasterization (about 13 FPS), so it says nothing about CPU-bound play on a real GPU.
+- **In deliberately heavy scenes the gain was about +20% to +45%.** The size of the gain varied noticeably between the two runs, so read these as "roughly 20-40%", not exact.
+- Most FPS gains in practice come from Sodium itself and from lowering render distance and video settings (see the presets), not from culling.
 
 Full methodology and raw numbers: [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
 ## Config
 
-With [Mod Menu](https://modrinth.com/mod/modmenu) installed, open Argon's settings screen from the mod list (optional; Argon works without it). Changes save when you press Done.
+Argon's settings are in **Options > Video Settings** (Sodium's screen), under their own **Argon** tab with Culling, Adaptive and Chunks & Presets pages. They use Sodium's controls, performance-impact badges and Apply button, and options grey out when the feature they depend on is off. If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, Argon's config button opens the same screen.
 
 You can also edit `config/argon.json` (created on first launch) and run `/argon reload`.
 

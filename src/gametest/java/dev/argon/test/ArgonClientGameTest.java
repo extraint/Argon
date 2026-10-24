@@ -5,12 +5,16 @@ import dev.argon.ArgonConfig;
 import dev.argon.ArgonClient;
 import dev.argon.ArgonStats;
 import dev.argon.Presets;
-import dev.argon.gui.ArgonConfigScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.caffeinemc.mods.sodium.client.SodiumClientMod;
 import net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.QuadSplittingMode;
+import net.caffeinemc.mods.sodium.client.config.ConfigManager;
+import net.caffeinemc.mods.sodium.client.config.structure.ModOptions;
+import net.caffeinemc.mods.sodium.client.config.structure.OptionPage;
+import net.caffeinemc.mods.sodium.client.gui.VideoSettingsScreen;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ParticleStatus;
 
 /** Loads a real world and checks that Argon's render hooks run and skip work without breaking the frame loop. */
@@ -91,13 +95,28 @@ public class ArgonClientGameTest implements FabricClientGameTest {
 		check(restored == 16, "render distance should return to the user's 16 when disabled, was " + restored);
 	}
 
+	/** Argon registers its pages with Sodium; check they exist, read back our values, and screenshot each. */
 	private static void testScreens(ClientGameTestContext context) {
-		context.setScreen(() -> new ArgonConfigScreen(null));
-		context.waitTick();
-		context.clickScreenButton("Chunks & Rendering...");
-		context.waitTick();
-		context.takeScreenshot("argon-rendering-screen");
-		context.clickScreenButton("Done");
+		ModOptions argon = ConfigManager.CONFIG.getModOptions().stream()
+			.filter(mod -> "argon".equals(mod.configId()))
+			.findFirst()
+			.orElseThrow(() -> new AssertionError("Argon did not register its options with Sodium"));
+		check(argon.pages().size() == 3, "expected 3 Argon pages in Sodium, found " + argon.pages().size());
+
+		ArgonConfig config = ArgonConfig.get();
+		config.entityDistance = 96;
+		ConfigManager.CONFIG.resetAllOptionsFromBindings(); // Sodium caches values and reloads them from bindings
+		check(ConfigManager.CONFIG.readIntOption(Identifier.fromNamespaceAndPath("argon", "entity_distance")) == 96,
+			"Sodium should read Argon's entity distance through the binding");
+
+		int index = 0;
+		for (var page : argon.pages()) {
+			OptionPage optionPage = (OptionPage) page;
+			context.setScreen(() -> VideoSettingsScreen.createScreen(null, optionPage));
+			context.waitTicks(3);
+			context.takeScreenshot("argon-sodium-page-" + index++);
+		}
+		context.setScreen(() -> null);
 	}
 
 	private static void check(boolean condition, String message) {

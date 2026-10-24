@@ -2,9 +2,11 @@ package dev.argon;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ClientModInitializer;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,9 @@ public class ArgonClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ArgonConfig.load();
 		applyTuning();
+
+		// Don't leave a temporarily lowered render distance in options.txt.
+		ClientLifecycleEvents.CLIENT_STOPPING.register(Adaptive::restoreRenderDistance);
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, buildContext) -> registerCommands(dispatcher));
 	}
@@ -40,16 +45,34 @@ public class ArgonClient implements ClientModInitializer {
 				return 1;
 			}))
 			.then(ClientCommands.literal("reload").executes(context -> {
+				Adaptive.restoreRenderDistance(context.getSource().getClient());
 				ArgonConfig.load();
 				Adaptive.reset();
 				applyTuning();
 				context.getSource().sendFeedback(Component.literal("Argon config reloaded"));
 				return 1;
 			}))
+			.then(presetCommand())
 			.then(ClientCommands.literal("reset").executes(context -> {
 				ArgonStats.reset();
 				context.getSource().sendFeedback(Component.literal("Argon counters reset"));
 				return 1;
 			})));
+	}
+
+	private static LiteralArgumentBuilder<FabricClientCommandSource> presetCommand() {
+		LiteralArgumentBuilder<FabricClientCommandSource> preset = ClientCommands.literal("preset");
+		for (Presets.Preset option : Presets.Preset.values()) {
+			preset.then(ClientCommands.literal(option.name().toLowerCase(java.util.Locale.ROOT)).executes(context -> {
+				int changed = Presets.apply(context.getSource().getClient(), option);
+				context.getSource().sendFeedback(Component.literal(option.label() + " preset applied (" + changed + " settings lowered). Use /argon preset undo to revert."));
+				return 1;
+			}));
+		}
+		return preset.then(ClientCommands.literal("undo").executes(context -> {
+			Presets.undo(context.getSource().getClient());
+			context.getSource().sendFeedback(Component.literal("Preset changes reverted"));
+			return 1;
+		}));
 	}
 }

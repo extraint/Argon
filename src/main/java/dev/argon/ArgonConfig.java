@@ -43,6 +43,16 @@ public final class ArgonConfig {
 	public boolean particleLimiter = true;
 	public int maxParticlesPerTick = 150;
 
+	/**
+	 * Lowers the render distance while FPS stays well below {@link #targetFps}, and restores it once there is
+	 * headroom. Never goes below {@link #minRenderDistance} and never above the value you had set.
+	 */
+	public boolean adaptiveRenderDistance = false;
+	public int minRenderDistance = 8;
+
+	/** "DEFAULT" keeps Sodium's setting; "FAST" turns off its translucent quad splitting (cheaper, can mis-sort glass/water). */
+	public String sodiumTranslucencySorting = "DEFAULT";
+
 	/** Override Sodium's chunk builder thread count. 0 leaves Sodium's automatic choice alone. */
 	public int sodiumChunkBuilderThreads = 0;
 
@@ -83,6 +93,8 @@ public final class ArgonConfig {
 		targetFps = Math.clamp(targetFps, 20, 360);
 		adaptiveMinScale = Math.clamp(adaptiveMinScale, 0.2, 1.0);
 		maxParticlesPerTick = Math.clamp(maxParticlesPerTick, 0, 10_000);
+		minRenderDistance = Math.clamp(minRenderDistance, 2, 32);
+		sodiumTranslucencySorting = "FAST".equalsIgnoreCase(sodiumTranslucencySorting) ? "FAST" : "DEFAULT";
 		sodiumChunkBuilderThreads = Math.clamp(sodiumChunkBuilderThreads, 0, 64);
 	}
 }

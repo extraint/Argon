@@ -12,6 +12,9 @@ Sodium already speeds up terrain rendering and chunk building; Argon targets the
 | Small entity budget | Draws at most 256 items, XP orbs, arrows and armor stands per frame, so a huge item pile can't tank the frame rate. |
 | Adaptive culling | Watches frame time. While FPS is below your target (default 60) the culling distances and particle cap shrink, down to 50% by default; they recover when there is headroom. Paused while the window is unfocused or minimized. |
 | Particle limiter | Caps particles spawned per tick (default 150) so explosions and farms can't stall the frame. |
+| Adaptive render distance | Off by default. While frames stay well below your target FPS it lowers render distance (2 chunks at a time, never below your minimum) and raises it back one chunk at a time when there is headroom, never above the value you chose. Changes are slow on purpose because every change reloads chunks. Your own value is restored when you disable it or quit. |
+| Performance presets | Balanced, Performance and Potato bundles of vanilla video settings (render distance, biome blend, clouds, particles, weather, mipmaps, entity distance, shadows, leaves, transparency, vignette, AO, chunk fade-in). Applied only when you press the button or run `/argon preset <name>`; they only ever lower a setting, and can be undone for the session. |
+| Translucency sorting | "Fast" turns off Sodium's translucent quad splitting, saving CPU on water and glass-heavy scenes at the cost of occasional sorting glitches. In memory only. |
 | Sodium chunk threads | Optional in-memory override of Sodium's chunk builder thread count. Sodium's own config file is never touched. |
 
 Gains depend on the scene. In a software-rendered A/B test, item piles, chest-heavy rooms and particle storms gained roughly 20-30%, a large mob herd did not change, and ordinary terrain is unaffected. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
@@ -36,17 +39,25 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
   "adaptiveMinScale": 0.5,
   "particleLimiter": true,
   "maxParticlesPerTick": 150,
+  "adaptiveRenderDistance": false,
+  "minRenderDistance": 8,
+  "sodiumTranslucencySorting": "DEFAULT",
   "sodiumChunkBuilderThreads": 0
 }
 ```
 
 ## Commands
 
-`/argon status`, `/argon reload`, `/argon reset`
+`/argon status`, `/argon reload`, `/argon reset`, `/argon preset <balanced|performance|potato|undo>`
 
 ## Requirements
 
 Minecraft 26.2, Fabric Loader 0.20.1+, Fabric API, Sodium 0.9.2+, Java 25.
+
+## What Argon cannot change
+
+- **OpenGL context flags** (such as Sodium's no-error context) and the **graphics backend** are fixed when the window is created, so a mod cannot switch them while the game runs. Change them in Sodium's settings or the vanilla Video Settings and restart.
+- Sodium's overrides here are applied in memory. If you press Apply in Sodium's own settings screen while an override is active, Sodium will save it.
 
 ## Why no shadow or idle-FPS options?
 

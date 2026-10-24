@@ -35,6 +35,7 @@ fabricApi {
 	configureTests {
 		createSourceSet = true
 		modId = 'argon-gametest'
+		enableGameTests = false
 		enableClientGameTests = true
 		eula = true
 		clearRunDirectory = true

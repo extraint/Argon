@@ -3,6 +3,13 @@
 	"minVersion": "0.8",
 	"package": "dev.argon.mixin",
 	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"common.EntityGetterMixin",
+		"common.EntitySectionMixin",
+		"common.EntitySectionStorageMixin",
+		"common.LevelEntityGetterAdapterMixin",
+		"common.LevelMixin"
+	],
 	"client": ["BlockEntityRenderDispatcherMixin", "EntityRenderDispatcherMixin", "ParticleEngineMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

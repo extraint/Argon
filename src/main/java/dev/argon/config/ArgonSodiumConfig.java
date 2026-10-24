@@ -43,6 +43,7 @@ public class ArgonSodiumConfig implements ConfigEntryPoint {
 		mod.addPage(culling(builder));
 		mod.addPage(adaptive(builder));
 		mod.addPage(chunksAndPresets(builder));
+		mod.addPage(gameLogic(builder));
 	}
 
 	private static OptionPageBuilder culling(ConfigBuilder b) {
@@ -145,6 +146,18 @@ public class ArgonSodiumConfig implements ConfigEntryPoint {
 		OptionGroupBuilder presets = b.createOptionGroup().setName(text("Presets")).addOption(preset).addOption(undo);
 
 		return b.createOptionPage().setName(text("Chunks & Presets")).addOptionGroup(chunks).addOptionGroup(presets);
+	}
+
+	private static OptionPageBuilder gameLogic(ConfigBuilder b) {
+		OptionGroupBuilder entities = b.createOptionGroup().setName(text("Entities"))
+			.addOption(bool(b, id("fast_entity_lookup"), "Fast Entity Lookup",
+				"Finds nearby entities with direct section lookups instead of scanning every loaded section in the world column. Same results in the same order as vanilla.",
+				OptionImpact.MEDIUM, c -> c.fastEntityLookup, (c, v) -> c.fastEntityLookup = v))
+			.addOption(bool(b, id("fast_entity_collisions"), "Fast Entity Collisions",
+				"Skips entity-collision scans of areas that contain nothing collidable (only boats, shulkers and a few others can be). Same results as vanilla. Mostly helps worlds with many items or mobs.",
+				OptionImpact.MEDIUM, c -> c.fastEntityCollisions, (c, v) -> c.fastEntityCollisions = v));
+
+		return b.createOptionPage().setName(text("Game Logic")).addOptionGroup(entities);
 	}
 
 	private static void afterSave() {

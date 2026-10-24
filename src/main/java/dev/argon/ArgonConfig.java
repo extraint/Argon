@@ -30,6 +30,13 @@ public final class ArgonConfig {
 	public boolean blockEntityCulling = true;
 	public int blockEntityDistance = 48;
 
+	/**
+	 * Behavior-preserving speedups to game logic that runs in the integrated server (singleplayer) and the client world:
+	 * entity lookups by area and entity collision checks. Turn off to fall back to vanilla's code.
+	 */
+	public boolean fastEntityLookup = true;
+	public boolean fastEntityCollisions = true;
+
 	/** Cap how many small entities (items, XP orbs, arrows, armor stands) are drawn per frame. 0 disables the cap. */
 	public int maxSmallEntitiesPerFrame = 256;
 

@@ -39,6 +39,7 @@ Full methodology and raw numbers: [docs/BENCHMARK.md](BENCHMARK.md).
 | Entity distance culling | Very large entities far away | Mostly redundant with vanilla for normal mobs |
 | Adaptive culling | Any scene that drops below your target FPS | Distances shrink down to 50% only while slow |
 | Adaptive render distance (opt-in) | GPU- or chunk-bound scenes | Fewer chunks shown while FPS is low |
+| Fast entity lookup / collisions | Tick lag (low TPS) in singleplayer, especially with many items | None; identical results to vanilla |
 | Presets | Weak hardware | Lowers vanilla video settings (undoable) |
 | Translucency sorting: Fast (opt-in) | Water and glass heavy views | Occasional sorting glitches |
 
@@ -66,6 +67,10 @@ Applied only when you press the button or run `/argon preset <balanced|performan
 - **Low FPS everywhere:** apply the Performance preset, then consider Adaptive Render Distance with a realistic `targetFps`.
 - **More CPU cores than Sodium uses:** set `sodiumChunkBuilderThreads` to a fixed value. Leave it at 0 for Sodium's automatic choice.
 - **Don't set `targetFps` above what your monitor or limiter allows:** adaptive features would then think every frame is slow.
+
+## Lag that isn't FPS
+
+If the game stutters while FPS looks fine, the integrated server may be running slowly (many items, mobs, hoppers). The **Game Logic** page has two safe optimizations for that; they are on by default. For heavier worlds also install [Lithium](https://modrinth.com/mod/lithium), which optimizes much more and works alongside Argon.
 
 ## What Argon cannot do
 

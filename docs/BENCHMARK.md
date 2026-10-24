@@ -41,3 +41,25 @@ Each cell is "run 1 / run 2".
 - **Entity distance culling does little for normal mobs**: vanilla already stops drawing an entity beyond roughly 64 blocks times its size, so the herd is essentially unchanged. It only matters for very large entities.
 - **Adaptive culling** only acts when FPS is below target. It engaged (scale 0.5) in the cow and normal-terrain scenes, where it produced little or no measurable gain, and stayed at 1.0 in the others because FPS was above 60.
 - Gains of roughly 20-45% appear only in the stress scenes above; in normal terrain there was none. Do not expect "drastic" improvements in normal play; Sodium provides most of the big wins.
+
+# Server tick time: Argon vs vanilla vs Lithium
+
+Argon's "Game Logic" options speed up code that runs in singleplayer's integrated server (and the client world). They are measured here as **milliseconds per server tick** (lower is better; 50 ms is the 20 TPS budget), from `ARGON_BENCH=server ./gradlew runClientGameTest`.
+
+- Each figure is the median of **separate game launches** (3 for vanilla and Argon, 2 for Lithium), each the median of 5 windows of 100 ticks. Flipping the options inside one launch gave misleading results (it disturbs the JIT), so each mode gets its own JVM.
+- Same caveats as above: no GPU, only 4 cores shared with the software renderer, staged scenes. Compare columns within this table only.
+- "Vanilla" = Argon's game-logic options off. "Lithium" = Lithium 0.25.3 loaded, Argon's options off. Lithium is a separate mod and none of its code is used by Argon.
+
+| Scene | Vanilla | Argon on | Lithium |
+| --- | ---: | ---: | ---: |
+| 400 mobs with AI (cows, villagers, chickens, pigs) in a pen | 11.7 | 11.6 (-1%) | 7.5 (-36%) |
+| 630 dropped items | 7.1 | 4.7 (**-35%**) | 3.4 (-52%) |
+| 500 mobs spread over ~280x280 blocks | 8.7 | 8.5 (-2%) | 6.0 (-31%) |
+| 420 empty hoppers | 4.8 | 4.2 (-11%) | 3.3 (-31%) |
+| Idle normal terrain | 4.9 | 4.7 (-5%) | 4.0 (-19%) |
+
+**Reading it honestly:** Argon's two optimizations help a lot when many items are ticking, a little with hoppers and idle terrain, and not measurably with plain mob AI. Lithium is faster in every scene because it optimizes far more systems (AI, pathfinding, block collisions, chunk storage and more). Argon is not a replacement for Lithium; the two can be installed together.
+
+## How correctness is checked
+
+`ArgonClientGameTest` populates a world with boats, minecarts, shulkers, armor stands, cows, villagers, a dragon with its parts and more, across several sections including negative coordinates. For 4,000 random query boxes it requires Argon's entity lookup and collision queries to return **exactly the same results in the same order** as vanilla's code. This test caught a real mistake during development (boats and minecarts use a different collision rule), which is now handled by falling back to vanilla for them.

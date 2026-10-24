@@ -18,6 +18,8 @@ public class ArgonClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		ArgonConfig.load();
 		applyTuning();
+		// Sodium may not have loaded its options yet when this entrypoint runs (it depends on mod load order).
+		ClientLifecycleEvents.CLIENT_STARTED.register(client -> applyTuning());
 
 		// Don't leave a temporarily lowered render distance in options.txt.
 		ClientLifecycleEvents.CLIENT_STOPPING.register(Adaptive::restoreRenderDistance);
@@ -29,6 +31,8 @@ public class ArgonClient implements ClientModInitializer {
 	public static void applyTuning() {
 		try {
 			SodiumTuning.apply(ArgonConfig.get());
+		} catch (IllegalStateException e) {
+			LOGGER.debug("Sodium's options are not available yet; Argon will apply its overrides once the client has started");
 		} catch (Throwable t) {
 			LOGGER.warn("Could not apply Sodium tuning; continuing without it", t);
 		}

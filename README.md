@@ -13,6 +13,8 @@ Sodium already speeds up terrain rendering and chunk building; Argon targets the
 | Block entity culling | Stops rendering chests, signs, banners, etc. past 48 blocks. Beacons and end portals are exempt. |
 | Small entity budget | Draws at most 256 items, XP orbs, arrows and armor stands per frame, so a huge item pile can't tank the frame rate. |
 | Adaptive culling | Watches frame time. While FPS is below your target (default 60) the culling distances and particle cap shrink, down to 50% by default; they recover when there is headroom. Paused while the window is unfocused or minimized. |
+| Fast entity lookup (game logic) | Finds nearby entities by looking up the few sections that matter instead of scanning every loaded section in the world column. Identical results, same order. About -35% tick time in an item-heavy scene. |
+| Fast entity collisions (game logic) | Skips collision scans of areas holding nothing collidable. Identical results. Falls back to vanilla for boats, minecarts and wind charges. |
 | Particle limiter | Caps particles spawned per tick (default 150) so explosions and farms can't stall the frame. |
 | Adaptive render distance | Off by default. While frames stay well below your target FPS it lowers render distance (2 chunks at a time, never below your minimum) and raises it back one chunk at a time when there is headroom, never above the value you chose. Changes are slow on purpose because every change reloads chunks. Your own value is restored when you disable it or quit. |
 | Performance presets | Balanced, Performance and Potato bundles of vanilla video settings (render distance, biome blend, clouds, particles, weather, mipmaps, entity distance, shadows, leaves, transparency, vignette, AO, chunk fade-in). Applied only when you press the button or run `/argon preset <name>`; they only ever lower a setting, and can be undone for the session. |
@@ -42,7 +44,7 @@ Full methodology and raw numbers: [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
 ## Config
 
-Argon's settings are in **Options > Video Settings** (Sodium's screen), under their own **Argon** tab with Culling, Adaptive and Chunks & Presets pages. They use Sodium's controls, performance-impact badges and Apply button, and options grey out when the feature they depend on is off. If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, Argon's config button opens the same screen.
+Argon's settings are in **Options > Video Settings** (Sodium's screen), under their own **Argon** tab with Culling, Adaptive, Chunks & Presets and Game Logic pages. They use Sodium's controls, performance-impact badges and Apply button, and options grey out when the feature they depend on is off. If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, Argon's config button opens the same screen.
 
 You can also edit `config/argon.json` (created on first launch) and run `/argon reload`.
 
@@ -53,6 +55,8 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
   "smallEntityDistance": 32,
   "blockEntityCulling": true,
   "blockEntityDistance": 48,
+  "fastEntityLookup": true,
+  "fastEntityCollisions": true,
   "maxSmallEntitiesPerFrame": 256,
   "adaptiveCulling": true,
   "targetFps": 60,
@@ -73,6 +77,10 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
 ## Requirements
 
 Minecraft 26.2, Fabric Loader 0.20.1+, Fabric API, Sodium 0.9.2+, Java 25.
+
+## Lithium-style game logic (partial)
+
+Argon includes two behavior-preserving optimizations in the spirit of [Lithium](https://modrinth.com/mod/lithium), for the integrated server in singleplayer and the client world. They are **not a replacement for Lithium**: in the benchmark Lithium was faster in every scene, and Argon's gains are concentrated in item-heavy worlds (about -35% tick time) with little change for plain mob AI. They work alongside Lithium (tested together). Argon is client-only, so none of this applies to dedicated servers; install Lithium there. No Lithium code is used in Argon. Numbers and method: [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
 ## What Argon cannot change
 

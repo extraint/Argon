@@ -3,6 +3,7 @@ package dev.argon;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ClientModInitializer;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.argon.server.ModCompat;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -19,7 +20,10 @@ public class ArgonClient implements ClientModInitializer {
 		ArgonConfig.load();
 		applyTuning();
 		// Sodium may not have loaded its options yet when this entrypoint runs (it depends on mod load order).
-		ClientLifecycleEvents.CLIENT_STARTED.register(client -> applyTuning());
+		ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+			applyTuning();
+			LOGGER.info("Argon: {}", ModCompat.describe());
+		});
 
 		// Don't leave a temporarily lowered render distance in options.txt.
 		ClientLifecycleEvents.CLIENT_STOPPING.register(Adaptive::restoreRenderDistance);
@@ -46,6 +50,7 @@ public class ArgonClient implements ClientModInitializer {
 						+ ArgonStats.BLOCK_ENTITIES_CULLED.sum() + " block entity renders, "
 						+ ArgonStats.PARTICLES_DROPPED.sum() + " particles. Adaptive culling scale: "
 						+ Math.round(Adaptive.scale() * 100) + "%"));
+				context.getSource().sendFeedback(Component.literal(ModCompat.describe()));
 				return 1;
 			}))
 			.then(ClientCommands.literal("reload").executes(context -> {

@@ -149,12 +149,14 @@ public class ArgonSodiumConfig implements ConfigEntryPoint {
 	}
 
 	private static OptionPageBuilder gameLogic(ConfigBuilder b) {
+		String lithiumNote = dev.argon.server.ModCompat.lithiumVersion().isPresent()
+			? " Lithium is installed: both run side by side (tested to give identical results)." : "";
 		OptionGroupBuilder entities = b.createOptionGroup().setName(text("Entities"))
 			.addOption(bool(b, id("fast_entity_lookup"), "Fast Entity Lookup",
-				"Finds nearby entities with direct section lookups instead of scanning every loaded section in the world column. Same results in the same order as vanilla.",
+				"Finds nearby entities with direct section lookups instead of scanning every loaded section in the world column. Same results in the same order as vanilla." + lithiumNote,
 				OptionImpact.MEDIUM, c -> c.fastEntityLookup, (c, v) -> c.fastEntityLookup = v))
 			.addOption(bool(b, id("fast_entity_collisions"), "Fast Entity Collisions",
-				"Skips entity-collision scans of areas that contain nothing collidable (only boats, shulkers and a few others can be). Same results as vanilla. Mostly helps worlds with many items or mobs.",
+				"Skips entity-collision scans of areas that contain nothing collidable (only boats, shulkers and a few others can be). Same results as vanilla. Mostly helps worlds with many items or mobs." + lithiumNote,
 				OptionImpact.MEDIUM, c -> c.fastEntityCollisions, (c, v) -> c.fastEntityCollisions = v));
 
 		return b.createOptionPage().setName(text("Game Logic")).addOptionGroup(entities);

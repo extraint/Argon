@@ -78,9 +78,17 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
 
 Minecraft 26.2, Fabric Loader 0.20.1+, Fabric API, Sodium 0.9.2+, Java 25.
 
-## Lithium-style game logic (partial)
+## Lithium-style game logic (partial) and using Argon with Lithium
 
-Argon includes two behavior-preserving optimizations in the spirit of [Lithium](https://modrinth.com/mod/lithium), for the integrated server in singleplayer and the client world. They are **not a replacement for Lithium**: in the benchmark Lithium was faster in every scene, and Argon's gains are concentrated in item-heavy worlds (about -35% tick time) with little change for plain mob AI. They work alongside Lithium (tested together). Argon is client-only, so none of this applies to dedicated servers; install Lithium there. No Lithium code is used in Argon. Numbers and method: [docs/BENCHMARK.md](docs/BENCHMARK.md).
+Argon includes two behavior-preserving optimizations in the spirit of [Lithium](https://modrinth.com/mod/lithium), for the integrated server in singleplayer and the client world. They are **not a replacement for Lithium**: on its own Lithium was faster in every scene we measured, while Argon's gains are concentrated in item-heavy worlds (about -35% tick time) with little change for plain mob AI. Argon is client-only, so none of this applies to dedicated servers; install Lithium there. No Lithium code is used in Argon. Numbers and method: [docs/BENCHMARK.md](docs/BENCHMARK.md).
+
+**Running both is supported.** Lithium does not touch Argon's entity-section lookup, and Argon's collision shortcut returns the same results as the code it sits in front of, with or without Lithium (checked by a 4,000-query equivalence test run under Lithium). Measured on top of Lithium, each Argon option was neutral to slightly positive and never clearly harmful (see the benchmark doc), so nothing is auto-disabled.
+
+How Argon behaves around other mods:
+
+- **A conflict can't stop the game from starting.** Argon's game-logic mixins are optional. If another mod changes the same methods, that optimization is skipped instead of crashing, and the helper code falls back to vanilla's behavior if only part of it applied.
+- **You can see what is active.** The log prints a line at startup and `/argon status` shows whether Lithium was detected and how many queries Argon's shortcuts have served. If an option is on but "0 served", something is blocking its hook.
+- **Tested together:** Lithium 0.25.3, FerriteCore 9.0.0, ImmediatelyFast 1.16.5, Sodium Extra 0.9.4 and Krypton 0.3.1, all loaded at once, with Sodium, Fabric API and Mod Menu. (Entity Culling and BadOptimizations are listed for 26.2 on Modrinth but declare older Minecraft versions, so they could not be tested here.)
 
 ## What Argon cannot change
 

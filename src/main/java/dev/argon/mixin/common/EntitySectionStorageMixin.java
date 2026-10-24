@@ -1,6 +1,7 @@
 package dev.argon.mixin.common;
 
 import dev.argon.ArgonConfig;
+import dev.argon.ArgonStats;
 import dev.argon.server.CollidableSection;
 import dev.argon.server.CollidableStorage;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -58,6 +59,7 @@ public abstract class EntitySectionStorageMixin<T extends EntityAccess> implemen
 		}
 
 		ci.cancel();
+		ArgonStats.FAST_ENTITY_LOOKUPS.increment();
 
 		for (int x = xMin; x <= xMax; x++) {
 			for (int zSegment = 0; zSegment < 2; zSegment++) {
@@ -100,7 +102,8 @@ public abstract class EntitySectionStorageMixin<T extends EntityAccess> implemen
 	@Override
 	public void argon$getInSectionsWithCollidables(AABB bounds, AbortableIterationConsumer<T> output) {
 		this.forEachAccessibleNonEmptySection(bounds, section -> {
-			if (((CollidableSection) section).argon$collidableCount() > 0) {
+			// If the section mixin is missing (another mod interfered), assume it may hold something collidable.
+			if (!(section instanceof CollidableSection counted) || counted.argon$collidableCount() > 0) {
 				return section.getEntities(bounds, output);
 			}
 			return AbortableIterationConsumer.Continuation.CONTINUE;

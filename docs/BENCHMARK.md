@@ -63,3 +63,17 @@ Argon's "Game Logic" options speed up code that runs in singleplayer's integrate
 ## How correctness is checked
 
 `ArgonClientGameTest` populates a world with boats, minecarts, shulkers, armor stands, cows, villagers, a dragon with its parts and more, across several sections including negative coordinates. For 4,000 random query boxes it requires Argon's entity lookup and collision queries to return **exactly the same results in the same order** as vanilla's code. This test caught a real mistake during development (boats and minecarts use a different collision rule), which is now handled by falling back to vanilla for them.
+
+## Argon on top of Lithium
+
+Same method as above, with Lithium 0.25.3 loaded in every run (ms per tick; n = separate launches; "+ both" is Argon's normal setting).
+
+| Scene | Lithium only (n=4) | + Argon lookup (n=2) | + Argon collisions (n=2) | + both (n=3) |
+| --- | ---: | ---: | ---: | ---: |
+| Mob pen | 7.4 | 6.7 | 6.4 | 7.1 |
+| Item pile | 3.4 | 3.4 | 3.1 | 3.1 |
+| Spread mobs | 6.1 | 6.0 | 6.0 | 5.4 |
+| Hopper field | 3.3 | 3.5 | 3.2 | 3.3 |
+| Idle terrain | 4.0 | 3.6 | 3.5 | 3.7 |
+
+With so few launches and about +/-5% noise, no single cell is conclusive. What the table does support: adding Argon on top of Lithium did not clearly make anything slower, and most cells moved slightly the right way, so Argon leaves both options on when Lithium is present. Lithium hooks the collision method from the inside (it redirects its entity fetch) while Argon replaces the method's start, so when Argon's shortcut runs, Lithium's version of that step does not; the equivalence test confirms the results are identical either way.

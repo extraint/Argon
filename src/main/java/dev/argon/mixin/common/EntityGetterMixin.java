@@ -2,6 +2,7 @@ package dev.argon.mixin.common;
 
 import com.google.common.collect.ImmutableList;
 import dev.argon.ArgonConfig;
+import dev.argon.ArgonStats;
 import dev.argon.server.CollidableQuery;
 import dev.argon.server.Collidability;
 import dev.argon.server.LevelAccess;
@@ -38,11 +39,15 @@ public interface EntityGetterMixin {
 		if (!ArgonConfig.get().fastEntityCollisions || !Collidability.sourceUsesDefaultRule(source) || !((Object) this instanceof Level level)) {
 			return;
 		}
-		LevelEntityGetter<Entity> getter = ((LevelAccess) level).argon$entityGetter();
+		if (!(level instanceof LevelAccess access)) {
+			return;
+		}
+		LevelEntityGetter<Entity> getter = access.argon$entityGetter();
 		if (!(getter instanceof LevelEntityGetterAdapter<?>) || !(getter instanceof CollidableQuery query)) {
 			return;
 		}
 
+		ArgonStats.FAST_COLLISION_QUERIES.increment();
 		if (testArea.getSize() < 1.0E-7) {
 			cir.setReturnValue(List.of());
 			return;

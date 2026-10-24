@@ -12,7 +12,10 @@
 		"modmenu": ["dev.argon.gui.ArgonModMenu"],
 		"sodium:config_api_user": ["dev.argon.config.ArgonSodiumConfig"]
 	},
-	"mixins": ["argon.mixins.json"],
+	"mixins": ["argon.mixins.json", "argon.common.mixins.json"],
+	"suggests": {
+		"lithium": "*"
+	},
 	"depends": {
 		"fabricloader": ">=0.20.1",
 		"minecraft": "~26.2",

@@ -123,6 +123,11 @@ public class ArgonClientGameTest implements FabricClientGameTest {
 		});
 
 		System.out.println("ARGON-EQUIVALENCE " + result);
+		System.out.println("ARGON-COMPAT " + dev.argon.server.ModCompat.describe());
+		check(dev.argon.server.ModCompat.gameLogicMixinsLoaded(), "Argon's game-logic mixins did not load: " + dev.argon.server.ModCompat.describe());
+		// The counters only move when the injected shortcuts really run, so this catches a hook that silently failed.
+		check(ArgonStats.FAST_ENTITY_LOOKUPS.sum() > 0, "fast entity lookup never ran: " + dev.argon.server.ModCompat.describe());
+		check(ArgonStats.FAST_COLLISION_QUERIES.sum() > 0, "fast collision path never ran: " + dev.argon.server.ModCompat.describe());
 		check(result.startsWith("ok"), "server optimizations diverged from vanilla: " + result);
 		check(Integer.parseInt(result.replaceAll(".*queriesWithCollisions=", "")) > 50, "test did not exercise collisions: " + result);
 		world.getServer().runCommand("kill @e[type=!minecraft:player]");
@@ -188,9 +193,10 @@ public class ArgonClientGameTest implements FabricClientGameTest {
 
 		ArgonConfig config = ArgonConfig.get();
 		config.entityDistance = 96;
-		ConfigManager.CONFIG.resetAllOptionsFromBindings(); // Sodium caches values and reloads them from bindings
-		check(ConfigManager.CONFIG.readIntOption(Identifier.fromNamespaceAndPath("argon", "entity_distance")) == 96,
-			"Sodium should read Argon's entity distance through the binding");
+		// Sodium caches values and reloads them from bindings; other mods' bindings expect the client thread
+		context.runOnClient(client -> ConfigManager.CONFIG.resetAllOptionsFromBindings());
+		int shown = context.computeOnClient(client -> ConfigManager.CONFIG.readIntOption(Identifier.fromNamespaceAndPath("argon", "entity_distance")));
+		check(shown == 96, "Sodium should read Argon's entity distance through the binding, got " + shown);
 
 		int index = 0;
 		for (var page : argon.pages()) {

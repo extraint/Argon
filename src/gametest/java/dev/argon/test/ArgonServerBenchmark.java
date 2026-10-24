@@ -22,12 +22,12 @@ public class ArgonServerBenchmark implements FabricClientGameTest {
 	private static final int FLUSH_TICKS = 100; // the tick-time ring holds 100 entries, so a full ring is all one mode
 	private static final String NORMAL_SEED = "argon-bench";
 
-	/** ARGON_BENCH_FORCE=on|off pins one mode for the whole run, e.g. to profile it. */
-	private static final Boolean FORCED = switch (String.valueOf(System.getenv("ARGON_BENCH_FORCE"))) {
-		case "on" -> Boolean.TRUE;
-		case "off" -> Boolean.FALSE;
-		default -> null;
-	};
+	/**
+	 * ARGON_BENCH_FORCE pins one mode for the whole run: on, off, lookup (only fast entity lookup) or
+	 * collisions (only fast entity collisions). Unset alternates between off and on inside one launch.
+	 */
+	private static final String FORCE = System.getenv("ARGON_BENCH_FORCE");
+	private static final Boolean FORCED = FORCE == null ? null : Boolean.TRUE;
 
 	private record Scenario(String name, Runnable setup, Runnable teardown) {
 	}
@@ -75,12 +75,14 @@ public class ArgonServerBenchmark implements FabricClientGameTest {
 
 			for (int round = 0; round < ROUNDS; round++) {
 				for (int i = 0; i < 2; i++) {
-					int mode = FORCED != null ? (FORCED ? 1 : 0) : (i + round) % 2; // 0 = Argon server optimizations off, 1 = on; order alternates
+					int mode = FORCED != null ? 1 : (i + round) % 2; // 0 = Argon server optimizations off, 1 = on; order alternates
 					if (FORCED != null && i == 1) {
 						break; // forced single-mode run: one measurement per round
 					}
-					ArgonConfig.get().fastEntityLookup = mode == 1;
-					ArgonConfig.get().fastEntityCollisions = mode == 1;
+					boolean lookup = mode == 1 && !"collisions".equals(FORCE) && !"off".equals(FORCE);
+					boolean collisions = mode == 1 && !"lookup".equals(FORCE) && !"off".equals(FORCE);
+					ArgonConfig.get().fastEntityLookup = lookup;
+					ArgonConfig.get().fastEntityCollisions = collisions;
 					context.waitTicks(FLUSH_TICKS);
 					long[] times = world.getServer().computeOnServer(server -> server.getTickTimesNanos().clone());
 					double mean = 0;
@@ -89,16 +91,16 @@ public class ArgonServerBenchmark implements FabricClientGameTest {
 						worst[mode] = Math.max(worst[mode], t / 1e6);
 					}
 					results[mode][round] = mean / times.length / 1e6;
-					System.out.printf("ARGON-MSPT scenario=%s argon=%s round=%d mspt=%.3f%n", scenario.name, mode == 1 ? "on" : "off", round, results[mode][round]);
+					System.out.printf("ARGON-MSPT scenario=%s argon=%s round=%d mspt=%.3f%n", scenario.name, FORCE != null ? FORCE : (mode == 1 ? "on" : "off"), round, results[mode][round]);
 				}
 			}
 			for (int mode = 0; mode < 2; mode++) {
-				if (FORCED != null && mode != (FORCED ? 1 : 0)) {
+				if (FORCED != null && mode != 1) {
 					continue;
 				}
 				double[] sorted = results[mode].clone();
 				java.util.Arrays.sort(sorted);
-				System.out.printf("ARGON-MSPT-MEDIAN scenario=%s argon=%s mspt=%.3f max=%.2f%n", scenario.name, mode == 1 ? "on" : "off", sorted[ROUNDS / 2], worst[mode]);
+				System.out.printf("ARGON-MSPT-MEDIAN scenario=%s argon=%s mspt=%.3f max=%.2f%n", scenario.name, FORCE != null ? FORCE : (mode == 1 ? "on" : "off"), sorted[ROUNDS / 2], worst[mode]);
 			}
 			scenario.teardown.run();
 			context.waitTicks(60);

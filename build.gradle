@@ -31,6 +31,11 @@ dependencies {
 		localRuntime "maven.modrinth:lithium:mc26.2-0.25.3-fabric"
 	}
 
+	// Dev only: -PextraMods=ferrite-core:9.0.0-fabric,krypton:0.3.1 loads other mods to smoke-test compatibility
+	if (project.hasProperty('extraMods')) {
+		project.property('extraMods').toString().split(',').each { localRuntime "maven.modrinth:${it.trim()}" }
+	}
+
 	// Optional integration: compiled against, and loaded in the dev client only
 	compileOnly "maven.modrinth:modmenu:${project.modmenu_version}"
 	localRuntime "maven.modrinth:modmenu:${project.modmenu_version}"

@@ -70,7 +70,7 @@ Applied only when you press the button or run `/argon preset <balanced|performan
 
 ## Lag that isn't FPS
 
-If the game stutters while FPS looks fine, the integrated server may be running slowly (many items, mobs, hoppers). The **Game Logic** page has two safe optimizations for that; they are on by default. For heavier worlds also install [Lithium](https://modrinth.com/mod/lithium), which optimizes much more and works alongside Argon.
+If the game stutters while FPS looks fine, the integrated server may be running slowly (many items, mobs, hoppers). The **Game Logic** page has two safe optimizations for that; they are on by default. For heavier worlds also install [Lithium](https://modrinth.com/mod/lithium), which optimizes much more and works alongside Argon (see the README for what was tested together).
 
 ## What Argon cannot do
 

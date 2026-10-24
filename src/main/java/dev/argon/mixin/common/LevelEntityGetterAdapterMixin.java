@@ -23,7 +23,11 @@ public abstract class LevelEntityGetterAdapterMixin<T extends EntityAccess> impl
 	@Override
 	@SuppressWarnings("unchecked")
 	public void argon$getCollidable(AABB bounds, Consumer<Entity> output) {
-		((CollidableStorage<T>) this.sectionStorage).argon$getInSectionsWithCollidables(bounds,
-			AbortableIterationConsumer.forConsumer(entity -> output.accept((Entity) entity)));
+		AbortableIterationConsumer<T> consumer = AbortableIterationConsumer.forConsumer(entity -> output.accept((Entity) entity));
+		if (this.sectionStorage instanceof CollidableStorage<?> storage) {
+			((CollidableStorage<T>) storage).argon$getInSectionsWithCollidables(bounds, consumer);
+		} else {
+			this.sectionStorage.getEntities(bounds, consumer); // storage mixin missing: plain traversal, same results
+		}
 	}
 }

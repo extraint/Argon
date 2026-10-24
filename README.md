@@ -17,7 +17,9 @@ Run `/argon status` to see how much work Argon has skipped.
 
 ## Config
 
-`config/argon.json` is created on first launch. Edit it and run `/argon reload`.
+With [Mod Menu](https://modrinth.com/mod/modmenu) installed, open Argon's settings screen from the mod list (optional; Argon works without it). Changes save when you press Done.
+
+You can also edit `config/argon.json` (created on first launch) and run `/argon reload`.
 
 ```json
 {

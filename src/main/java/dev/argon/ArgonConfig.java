@@ -66,7 +66,7 @@ public final class ArgonConfig {
 		}
 	}
 
-	private void sanitize() {
+	public void sanitize() {
 		entityDistance = Math.clamp(entityDistance, 16, 512);
 		smallEntityDistance = Math.clamp(smallEntityDistance, 8, entityDistance);
 		blockEntityDistance = Math.clamp(blockEntityDistance, 16, 512);

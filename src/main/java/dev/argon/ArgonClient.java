@@ -15,13 +15,18 @@ public class ArgonClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ArgonConfig.load();
+		applyTuning();
+
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, buildContext) -> registerCommands(dispatcher));
+	}
+
+	/** Pushes settings that live outside Argon (currently Sodium's thread count) after a load or edit. */
+	public static void applyTuning() {
 		try {
 			SodiumTuning.apply(ArgonConfig.get());
 		} catch (Throwable t) {
 			LOGGER.warn("Could not apply Sodium tuning; continuing without it", t);
 		}
-
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, buildContext) -> registerCommands(dispatcher));
 	}
 
 	private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -35,6 +40,7 @@ public class ArgonClient implements ClientModInitializer {
 			}))
 			.then(ClientCommands.literal("reload").executes(context -> {
 				ArgonConfig.load();
+				applyTuning();
 				context.getSource().sendFeedback(Component.literal("Argon config reloaded"));
 				return 1;
 			}))

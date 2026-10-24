@@ -7,7 +7,10 @@
 	"authors": ["Argon contributors"],
 	"license": "MIT",
 	"environment": "client",
-	"entrypoints": { "client": ["dev.argon.ArgonClient"] },
+	"entrypoints": {
+		"client": ["dev.argon.ArgonClient"],
+		"modmenu": ["dev.argon.gui.ArgonModMenu"]
+	},
 	"mixins": ["argon.mixins.json"],
 	"depends": {
 		"fabricloader": ">=0.20.1",

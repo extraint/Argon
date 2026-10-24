@@ -1,0 +1,51 @@
+# Argon
+
+A client-side Fabric mod for **Minecraft 26.2** that adds extra performance work on top of [Sodium](https://modrinth.com/mod/sodium).
+Sodium already speeds up terrain rendering and chunk building; Argon targets the parts it leaves alone.
+
+## What it does
+
+| Feature | Effect |
+| --- | --- |
+| Entity distance culling | Stops rendering entities past a cutoff (default 64 blocks; 32 for items, XP orbs, arrows and armor stands). Large entities get extra range so dragons and ghasts never vanish. Glowing entities, the player and the camera's vehicle are never culled. |
+| Block entity culling | Stops rendering chests, signs, banners, etc. past 48 blocks. Beacons and end portals are exempt. |
+| Particle limiter | Caps particles spawned per tick (default 150) so explosions and farms can't stall the frame. |
+| Sodium chunk threads | Optional in-memory override of Sodium's chunk builder thread count. Sodium's own config file is never touched. |
+
+Gains depend on the scene: they are largest around mob farms, item piles, storage rooms and heavy particle effects, and small in an empty plains biome.
+Run `/argon status` to see how much work Argon has skipped.
+
+## Config
+
+`config/argon.json` is created on first launch. Edit it and run `/argon reload`.
+
+```json
+{
+  "entityCulling": true,
+  "entityDistance": 64,
+  "smallEntityDistance": 32,
+  "blockEntityCulling": true,
+  "blockEntityDistance": 48,
+  "particleLimiter": true,
+  "maxParticlesPerTick": 150,
+  "sodiumChunkBuilderThreads": 0
+}
+```
+
+## Commands
+
+`/argon status`, `/argon reload`, `/argon reset`
+
+## Requirements
+
+Minecraft 26.2, Fabric Loader 0.20.1+, Fabric API, Sodium 0.9.2+, Java 25.
+
+## Building
+
+Minecraft 26.x needs JDK 25 and Gradle 9.1+ (the wrapper is included):
+
+```
+./gradlew build
+```
+
+The jar is written to `build/libs/argon-<version>.jar`.

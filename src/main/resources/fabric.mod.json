@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "argon",
+	"version": "${version}",
+	"name": "Argon",
+	"description": "Client-side performance add-on for Sodium: smarter culling, throttled particles and ambient updates, and chunk-loading tuning.",
+	"authors": ["Argon contributors"],
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": { "client": ["dev.argon.ArgonClient"] },
+	"mixins": ["argon.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*",
+		"sodium": ">=0.9.2"
+	}
+}

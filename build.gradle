@@ -38,7 +38,9 @@ dependencies {
 
 	// Optional integration: compiled against, and loaded in the dev client only
 	compileOnly "maven.modrinth:modmenu:${project.modmenu_version}"
-	localRuntime "maven.modrinth:modmenu:${project.modmenu_version}"
+	if (!project.hasProperty('noModMenu')) {
+		localRuntime "maven.modrinth:modmenu:${project.modmenu_version}"
+	}
 }
 
 fabricApi {

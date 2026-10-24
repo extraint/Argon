@@ -24,7 +24,7 @@ Full methodology and raw numbers: [docs/BENCHMARK.md](BENCHMARK.md).
 
 ## Quick start
 
-1. Install Minecraft 26.2 with Fabric Loader 0.20.1+, Fabric API, **Sodium 0.9.2+** and Argon (Java 25).
+1. Install Minecraft 26.2 with Fabric Loader 0.18.4+, Fabric API, **Sodium 0.9.2+** and Argon (Java 25).
 2. Launch once, then open **Options > Video Settings** and pick the **Argon** tab on the left (or edit `config/argon.json`).
 3. Leave the defaults on. They are safe and invisible in normal play.
 4. Still too slow? Open the **Chunks & Presets** page, set **Apply Preset** to Performance and press Apply (see below).

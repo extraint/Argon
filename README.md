@@ -76,7 +76,7 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
 
 ## Requirements
 
-Minecraft 26.2, Fabric Loader 0.20.1+, Fabric API, Sodium 0.9.2+, Java 25.
+Minecraft 26.2, Fabric Loader 0.18.4+, Fabric API, Sodium 0.9.2+, Java 25.
 
 ## Lithium-style game logic (partial) and using Argon with Lithium
 

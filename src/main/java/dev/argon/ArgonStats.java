@@ -7,6 +7,8 @@ public final class ArgonStats {
 	public static final LongAdder ENTITIES_CULLED = new LongAdder();
 	public static final LongAdder BLOCK_ENTITIES_CULLED = new LongAdder();
 	public static final LongAdder PARTICLES_DROPPED = new LongAdder();
+	/** Extracted frames; lets tests derive FPS. */
+	public static final LongAdder FRAMES = new LongAdder();
 
 	private ArgonStats() {
 	}

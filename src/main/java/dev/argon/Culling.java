@@ -27,6 +27,7 @@ public final class Culling {
 	/** Resets per-frame budgets and feeds the adaptive scaler. */
 	public static void beginFrame() {
 		SMALL_ENTITIES_DRAWN.set(0);
+		ArgonStats.FRAMES.increment();
 		Adaptive.onFrame(Minecraft.getInstance());
 	}
 

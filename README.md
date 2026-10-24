@@ -7,14 +7,14 @@ Sodium already speeds up terrain rendering and chunk building; Argon targets the
 
 | Feature | Effect |
 | --- | --- |
-| Entity distance culling | Stops rendering entities past a cutoff (default 64 blocks; 32 for items, XP orbs, arrows and armor stands). Large entities get extra range so dragons and ghasts never vanish. Glowing entities, the player and the camera's vehicle are never culled. |
+| Entity distance culling | Stops rendering entities past a cutoff (default 64 blocks; 32 for items, XP orbs, arrows and armor stands). Vanilla already culls most mobs at a similar range, so this mainly matters for very large entities. Large entities get extra range so dragons and ghasts never vanish. Glowing entities, the player and the camera's vehicle are never culled. |
 | Block entity culling | Stops rendering chests, signs, banners, etc. past 48 blocks. Beacons and end portals are exempt. |
 | Small entity budget | Draws at most 256 items, XP orbs, arrows and armor stands per frame, so a huge item pile can't tank the frame rate. |
 | Adaptive culling | Watches frame time. While FPS is below your target (default 60) the culling distances and particle cap shrink, down to 50% by default; they recover when there is headroom. Paused while the window is unfocused or minimized. |
 | Particle limiter | Caps particles spawned per tick (default 150) so explosions and farms can't stall the frame. |
 | Sodium chunk threads | Optional in-memory override of Sodium's chunk builder thread count. Sodium's own config file is never touched. |
 
-Gains depend on the scene: they are largest around mob farms, item piles, storage rooms and heavy particle effects, and small in an empty plains biome.
+Gains depend on the scene. In a software-rendered A/B test, item piles, chest-heavy rooms and particle storms gained roughly 20-30%, a large mob herd did not change, and ordinary terrain is unaffected. See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the numbers and caveats.
 Run `/argon status` to see how much work Argon has skipped.
 
 ## Config

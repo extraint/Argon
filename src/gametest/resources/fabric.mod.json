@@ -4,6 +4,6 @@
 	"version": "1.0.0",
 	"name": "Argon Game Tests",
 	"environment": "client",
-	"entrypoints": { "fabric-client-gametest": ["dev.argon.test.ArgonClientGameTest"] },
+	"entrypoints": { "fabric-client-gametest": ["dev.argon.test.ArgonClientGameTest", "dev.argon.test.ArgonBenchmark"] },
 	"depends": { "argon": "*" }
 }

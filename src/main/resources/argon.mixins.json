@@ -2,7 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "dev.argon.mixin",
-	"compatibilityLevel": "JAVA_25",
+	"compatibilityLevel": "JAVA_${java_version}",
 	"client": ["BlockEntityRenderDispatcherMixin", "EntityRenderDispatcherMixin", "ParticleEngineMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

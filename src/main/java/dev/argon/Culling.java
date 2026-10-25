@@ -64,7 +64,10 @@ public final class Culling {
 			return false;
 		}
 
+		//? if >=26.2 {
 		Vec3 camera = Minecraft.getInstance().gameRenderer.mainCamera().position();
+		//?} else
+		/*Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera().position();*/
 		double limit = scaled(config.blockEntityDistance, 16);
 
 		return blockEntity.getBlockPos().distToCenterSqr(camera) > limit * limit;

@@ -36,7 +36,7 @@ public interface EntityGetterMixin {
 	 */
 	@Inject(method = "getEntityCollisions", at = @At("HEAD"), cancellable = true)
 	private void argon$fastEntityCollisions(@Nullable Entity source, AABB testArea, CallbackInfoReturnable<List<VoxelShape>> cir) {
-		if (!ArgonConfig.get().fastEntityCollisions || !Collidability.sourceUsesDefaultRule(source) || !((Object) this instanceof Level level)) {
+		if (!ArgonConfig.get().fastEntityCollisions || !Collidability.verified() || !Collidability.sourceUsesDefaultRule(source) || !((Object) this instanceof Level level)) {
 			return;
 		}
 		if (!(level instanceof LevelAccess access)) {

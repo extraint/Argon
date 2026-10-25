@@ -1,19 +1,31 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version '1.19-SNAPSHOT'
+	// Picks the remapping Loom for obfuscated versions (1.21.x) and the plain one for 26.x,
+	// and lets modImplementation etc. work on both.
+	id 'dev.kikugie.loom-back-compat'
 	id 'maven-publish'
 }
 
-version = project.mod_version
-group = project.maven_group
+def mc = stonecutter.current.version
+def javaVersion = property('java_version') as int
+def modVersion = property('mod_version')
+def minecraftDep = property('minecraft_dep')
+def sodiumMin = property('sodium_min')
+def loaderMin = property('loader_min')
+// 1.21.x is obfuscated: it takes a classic access widener in Mojang names, which Loom remaps; 26.x takes a class tweaker
+def obfuscated = stonecutter.eval(mc, '<26')
+def accessWidenerFile = obfuscated ? 'argon.accesswidener' : 'argon.classtweaker'
+
+version = "${property('mod_version')}+${mc}"
+group = property('maven_group')
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = property('archives_base_name')
 }
 
 repositories {
-	mavenCentral()
-	// Mirror of Maven Central, used when Central itself is unreachable or rate-limited
+	// Mirror of Maven Central first: Central itself rate-limits (HTTP 429) and Gradle does not fall back on errors
 	maven { url = 'https://maven-central.storage-download.googleapis.com/maven2' }
+	mavenCentral()
 	exclusiveContent {
 		forRepository { maven { url = 'https://api.modrinth.com/maven' } }
 		filter { includeGroup 'maven.modrinth' }
@@ -21,26 +33,31 @@ repositories {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	implementation "maven.modrinth:sodium:${project.sodium_version}"
+	minecraft "com.mojang:minecraft:${mc}"
+	loomx.applyMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${property('loader_version')}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${property('fabric_api_version')}"
+	modImplementation "maven.modrinth:sodium:${property('sodium_version')}"
 
 	// Reference only: -PwithLithium loads Lithium in the dev client so benchmarks can compare against it
 	if (project.hasProperty('withLithium')) {
-		localRuntime "maven.modrinth:lithium:mc26.2-0.25.3-fabric"
+		modLocalRuntime "maven.modrinth:lithium:${property('lithium_version')}"
 	}
 
 	// Dev only: -PextraMods=ferrite-core:9.0.0-fabric,krypton:0.3.1 loads other mods to smoke-test compatibility
 	if (project.hasProperty('extraMods')) {
-		project.property('extraMods').toString().split(',').each { localRuntime "maven.modrinth:${it.trim()}" }
+		project.property('extraMods').toString().split(',').each { modLocalRuntime "maven.modrinth:${it.trim()}" }
 	}
 
 	// Optional integration: compiled against, and loaded in the dev client only
-	compileOnly "maven.modrinth:modmenu:${project.modmenu_version}"
+	modCompileOnly "maven.modrinth:modmenu:${property('modmenu_version')}"
 	if (!project.hasProperty('noModMenu')) {
-		localRuntime "maven.modrinth:modmenu:${project.modmenu_version}"
+		modLocalRuntime "maven.modrinth:modmenu:${property('modmenu_version')}"
 	}
+}
+
+loom {
+	accessWidenerPath = rootProject.file("src/main/resources/${accessWidenerFile}")
 }
 
 fabricApi {
@@ -55,18 +72,35 @@ fabricApi {
 }
 
 processResources {
-	inputs.property 'version', project.version
-	filesMatching('fabric.mod.json') {
-		expand 'version': inputs.properties.version
+	def props = [
+		version      : project.version,
+		minecraft_dep: minecraftDep,
+		java_version : javaVersion,
+		sodium_min   : sodiumMin,
+		loader_min   : loaderMin,
+		access_widener: accessWidenerFile,
+	]
+	inputs.properties props
+	filesMatching(['fabric.mod.json', '*.mixins.json']) {
+		expand props
 	}
+	exclude(obfuscated ? 'argon.classtweaker' : 'argon.accesswidener')
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = javaVersion
 }
 
 java {
 	withSourcesJar()
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.toVersion(javaVersion)
+	targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+// Collects every version's jar into build/libs/<mod version>/ at the root
+tasks.register('collectJars', Copy) {
+	group = 'build'
+	description = 'Builds this version\'s mod jar and copies it to the root build/libs/<mod version>/'
+	from loomx.modJar.flatMap { it.archiveFile }
+	into rootProject.layout.buildDirectory.dir("libs/${modVersion}")
 }

@@ -1,6 +1,6 @@
 # Argon
 
-A client-side Fabric mod for **Minecraft 26.2** that adds extra performance work on top of [Sodium](https://modrinth.com/mod/sodium).
+A client-side Fabric mod for **Minecraft 1.21.11, 26.1.2, 26.2 and 26.3** that adds extra performance work on top of [Sodium](https://modrinth.com/mod/sodium).
 Sodium already speeds up terrain rendering and chunk building; Argon targets the parts it leaves alone.
 
 **New here?** Read the [FPS boosting guide](docs/FPS-BOOSTING.md) for what each option does, preset values and tuning tips.
@@ -74,9 +74,27 @@ You can also edit `config/argon.json` (created on first launch) and run `/argon 
 
 `/argon status`, `/argon reload`, `/argon reset`, `/argon preset <balanced|performance|potato|undo>`
 
-## Requirements
+## Versions and requirements
 
-Minecraft 26.2, Fabric Loader 0.18.4+, Fabric API, Sodium 0.9.2+, Java 25.
+Download the jar whose name matches your Minecraft version (`argon-1.0.0+<minecraft>.jar`). Fabric API and Sodium are required; Mod Menu and Lithium are optional.
+
+| Minecraft | Java | Fabric Loader | Sodium |
+| --- | --- | --- | --- |
+| 1.21.11 | 21+ | 0.17.3+ | 0.8.14+ |
+| 26.1.2 | 25+ | 0.18.4+ | 0.9.2+ |
+| 26.2 | 25+ | 0.18.4+ | 0.9.2+ |
+| 26.3 | 25+ | 0.19.3+ | 0.9.2+ |
+
+The Fabric Loader minimum is the one each version's Fabric API needs; Mod Menu needs 0.19.2+ on 26.2 and 26.3.
+
+How each version was tested (headless, software rendering, no GPU):
+
+| Minecraft | Automated in-game test suite | Notes |
+| --- | --- | --- |
+| 1.21.11 | Passes | Also passes on Fabric Loader 0.17.3. Built with Mojang mappings and remapped for the released game. |
+| 26.1.2 | Could not run | Every Argon mixin applies (mixin audit), and a normal client session loaded a world and rendered it with Argon's hooks active. The automated suite crashes inside Sodium's terrain renderer under Fabric's test harness; the same crash happens with Argon fully disabled, so it is not caused by Argon. |
+| 26.2 | Passes | All benchmarks in this README and in `docs/` were measured on 26.2. |
+| 26.3 | Passes | 26.3 opens its window through SDL3; headless testing needs `SDL_VIDEO_DRIVER=offscreen` with Mesa EGL installed. |
 
 ## Lithium-style game logic (partial) and using Argon with Lithium
 
@@ -97,20 +115,22 @@ How Argon behaves around other mods:
 
 ## Why no shadow or idle-FPS options?
 
-Vanilla 26.2 already stops entity shadows past 16 blocks and throttles minimized or idle windows, so Argon leaves those alone.
+Vanilla already stops entity shadows past 16 blocks and throttles minimized or idle windows on every supported version, so Argon leaves those alone.
 
 ## Building
 
-Minecraft 26.x needs JDK 25 and Gradle 9.1+ (the wrapper is included):
+One codebase builds every version with [Stonecutter](https://stonecutter.kikugie.dev/). Shared code is in `src/`; the few version differences are marked with Stonecutter comments such as `//? if >=26.2 {`, and each version's dependency versions are in `versions/<minecraft>/gradle.properties`. The sources in `src/` are kept in their 26.2 form.
+
+Build with JDK 25 (it also compiles the Java 21 jar for 1.21.11) and the included Gradle wrapper:
 
 ```
 ./gradlew build
 ```
 
-The jar is written to `build/libs/argon-<version>.jar`.
+Each version's jar is written to `versions/<minecraft>/build/libs/argon-<mod version>+<minecraft>.jar`; `./gradlew collectJars` also copies them all into `build/libs/<mod version>/`.
 
-A client game test loads a world, overflows the entity and particle budgets, and checks Argon's counters. It needs a display (use `xvfb-run` on a headless machine):
+A client game test audits every mixin, loads a world, overflows the entity and particle budgets, checks Argon's counters and compares its game-logic shortcuts against vanilla. It needs a display (use `xvfb-run` on a headless machine):
 
 ```
-./gradlew runClientGameTest
+./gradlew :26.2:runClientGameTest
 ```

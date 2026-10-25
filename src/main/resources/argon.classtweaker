@@ -1,0 +1,3 @@
+classTweaker	v1	official
+# OptionInstance.ValueSet is package-private before 26.2; Argon validates option values through it.
+accessible	class	net/minecraft/client/OptionInstance$ValueSet

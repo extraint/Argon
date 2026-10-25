@@ -5,7 +5,10 @@ import net.fabricmc.api.ClientModInitializer;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.argon.server.ModCompat;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+//? if >=26.1 {
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+//?} else
+/*import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;*/
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.network.chat.Component;
@@ -43,8 +46,8 @@ public class ArgonClient implements ClientModInitializer {
 	}
 
 	private static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-		dispatcher.register(ClientCommands.literal("argon")
-			.then(ClientCommands.literal("status").executes(context -> {
+		dispatcher.register(literal("argon")
+			.then(literal("status").executes(context -> {
 				context.getSource().sendFeedback(Component.literal(
 					"Argon skipped this session: " + ArgonStats.ENTITIES_CULLED.sum() + " entity renders, "
 						+ ArgonStats.BLOCK_ENTITIES_CULLED.sum() + " block entity renders, "
@@ -53,7 +56,7 @@ public class ArgonClient implements ClientModInitializer {
 				context.getSource().sendFeedback(Component.literal(ModCompat.describe()));
 				return 1;
 			}))
-			.then(ClientCommands.literal("reload").executes(context -> {
+			.then(literal("reload").executes(context -> {
 				Adaptive.restoreRenderDistance(context.getSource().getClient());
 				ArgonConfig.load();
 				Adaptive.reset();
@@ -62,7 +65,7 @@ public class ArgonClient implements ClientModInitializer {
 				return 1;
 			}))
 			.then(presetCommand())
-			.then(ClientCommands.literal("reset").executes(context -> {
+			.then(literal("reset").executes(context -> {
 				ArgonStats.reset();
 				context.getSource().sendFeedback(Component.literal("Argon counters reset"));
 				return 1;
@@ -70,18 +73,25 @@ public class ArgonClient implements ClientModInitializer {
 	}
 
 	private static LiteralArgumentBuilder<FabricClientCommandSource> presetCommand() {
-		LiteralArgumentBuilder<FabricClientCommandSource> preset = ClientCommands.literal("preset");
+		LiteralArgumentBuilder<FabricClientCommandSource> preset = literal("preset");
 		for (Presets.Preset option : Presets.Preset.values()) {
-			preset.then(ClientCommands.literal(option.name().toLowerCase(java.util.Locale.ROOT)).executes(context -> {
+			preset.then(literal(option.name().toLowerCase(java.util.Locale.ROOT)).executes(context -> {
 				int changed = Presets.apply(context.getSource().getClient(), option);
 				context.getSource().sendFeedback(Component.literal(option.label() + " preset applied (" + changed + " settings lowered). Use /argon preset undo to revert."));
 				return 1;
 			}));
 		}
-		return preset.then(ClientCommands.literal("undo").executes(context -> {
+		return preset.then(literal("undo").executes(context -> {
 			Presets.undo(context.getSource().getClient());
 			context.getSource().sendFeedback(Component.literal("Preset changes reverted"));
 			return 1;
 		}));
+	}
+
+	private static LiteralArgumentBuilder<FabricClientCommandSource> literal(String name) {
+		//? if >=26.1 {
+		return ClientCommands.literal(name);
+		//?} else
+		/*return ClientCommandManager.literal(name);*/
 	}
 }

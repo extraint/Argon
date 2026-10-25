@@ -1,6 +1,6 @@
 # FPS boosting with Argon
 
-Argon is a Fabric 26.2 add-on for [Sodium](https://modrinth.com/mod/sodium). Sodium does the heavy lifting (terrain rendering, chunk building, its own entity culling); Argon trims the work Sodium leaves alone and gives you one-click settings that cut GPU and CPU load.
+Argon is a Fabric add-on (Minecraft 1.21.11, 26.1.2, 26.2 and 26.3) for [Sodium](https://modrinth.com/mod/sodium). Sodium does the heavy lifting (terrain rendering, chunk building, its own entity culling); Argon trims the work Sodium leaves alone and gives you one-click settings that cut GPU and CPU load.
 
 **What to expect:** see the percentages below. In heavy scenes (item piles, chest-filled rooms, particle storms) software-rendered tests showed roughly 20-45% more FPS, and none in normal terrain. See [BENCHMARK.md](BENCHMARK.md) for the numbers and their limits. Presets and render distance are where large gains usually come from, because they remove work entirely.
 
@@ -24,7 +24,7 @@ Full methodology and raw numbers: [docs/BENCHMARK.md](BENCHMARK.md).
 
 ## Quick start
 
-1. Install Minecraft 26.2 with Fabric Loader 0.18.4+, Fabric API, **Sodium 0.9.2+** and Argon (Java 25).
+1. Install Fabric Loader, Fabric API, **Sodium** and the Argon jar for your Minecraft version (see the requirements table in the README).
 2. Launch once, then open **Options > Video Settings** and pick the **Argon** tab on the left (or edit `config/argon.json`).
 3. Leave the defaults on. They are safe and invisible in normal play.
 4. Still too slow? Open the **Chunks & Presets** page, set **Apply Preset** to Performance and press Apply (see below).
@@ -76,7 +76,7 @@ If the game stutters while FPS looks fine, the integrated server may be running 
 
 - OpenGL context flags and the graphics backend are fixed when the window opens, so Argon can't change them at runtime.
 - Argon can't make a GPU-bound scene faster than the GPU allows; it reduces the work submitted.
-- Vanilla 26.2 already drops entity shadows past 16 blocks and throttles minimized or idle windows, so Argon doesn't duplicate that.
+- Vanilla already drops entity shadows past 16 blocks and throttles minimized or idle windows, so Argon doesn't duplicate that.
 
 ## Verifying changes yourself
 

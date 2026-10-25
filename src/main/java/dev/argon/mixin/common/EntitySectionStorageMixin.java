@@ -106,6 +106,9 @@ public abstract class EntitySectionStorageMixin<T extends EntityAccess> implemen
 			if (!(section instanceof CollidableSection counted) || counted.argon$collidableCount() > 0) {
 				return section.getEntities(bounds, output);
 			}
+			//? if >=26.3 {
+			/*return net.minecraft.util.Continuation.CONTINUE;
+			*///?} else
 			return AbortableIterationConsumer.Continuation.CONTINUE;
 		});
 	}

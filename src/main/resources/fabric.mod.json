@@ -13,15 +13,16 @@
 		"modmenu": ["dev.argon.gui.ArgonModMenu"],
 		"sodium:config_api_user": ["dev.argon.config.ArgonSodiumConfig"]
 	},
+	"accessWidener": "${access_widener}",
 	"mixins": ["argon.mixins.json", "argon.common.mixins.json"],
 	"suggests": {
 		"lithium": "*"
 	},
 	"depends": {
-		"fabricloader": ">=0.18.4",
-		"minecraft": "~26.2",
-		"java": ">=25",
+		"fabricloader": ">=${loader_min}",
+		"minecraft": "${minecraft_dep}",
+		"java": ">=${java_version}",
 		"fabric-api": "*",
-		"sodium": ">=0.9.2"
+		"sodium": ">=${sodium_min}"
 	}
 }

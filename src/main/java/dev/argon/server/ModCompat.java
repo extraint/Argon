@@ -43,6 +43,7 @@ public final class ModCompat {
 		}
 		return lithium + "game-logic mixins loaded; fast entity lookup " + (config.fastEntityLookup ? "on" : "off") + " ("
 			+ ArgonStats.FAST_ENTITY_LOOKUPS.sum() + " served), fast collisions " + (config.fastEntityCollisions ? "on" : "off")
-			+ " (" + ArgonStats.FAST_COLLISION_QUERIES.sum() + " served)";
+			+ " (" + ArgonStats.FAST_COLLISION_QUERIES.sum() + " served)"
+			+ (Collidability.verified() ? "" : "; collision rules could not be verified, so fast collisions stay off");
 	}
 }

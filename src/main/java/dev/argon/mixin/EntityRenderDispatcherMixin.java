@@ -21,6 +21,9 @@ public class EntityRenderDispatcherMixin {
 	}
 
 	@Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
+	//? if >=26.3 {
+	/*private void argon$cullDistantEntities(Entity entity, Frustum frustum, double camX, double camY, double camZ, float partialTick, CallbackInfoReturnable<Boolean> cir) {
+	*///?} else
 	private void argon$cullDistantEntities(Entity entity, Frustum frustum, double camX, double camY, double camZ, CallbackInfoReturnable<Boolean> cir) {
 		if (Culling.shouldCullEntity(entity, camX, camY, camZ)) {
 			ArgonStats.ENTITIES_CULLED.increment();

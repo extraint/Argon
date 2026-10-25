@@ -30,6 +30,11 @@ public class ArgonClientGameTest implements FabricClientGameTest {
 		if (System.getenv("ARGON_BENCH") != null) {
 			return; // benchmark runs only measure
 		}
+		// Apply every mixin now (Argon's and other mods'), so a wrong target on this Minecraft version fails here,
+		// before any world is created.
+		org.spongepowered.asm.mixin.MixinEnvironment.getCurrentEnvironment().audit();
+		System.out.println("ARGON-AUDIT ok");
+
 		ArgonConfig.load();
 		ArgonStats.reset();
 
@@ -126,6 +131,7 @@ public class ArgonClientGameTest implements FabricClientGameTest {
 		System.out.println("ARGON-COMPAT " + dev.argon.server.ModCompat.describe());
 		check(dev.argon.server.ModCompat.gameLogicMixinsLoaded(), "Argon's game-logic mixins did not load: " + dev.argon.server.ModCompat.describe());
 		// The counters only move when the injected shortcuts really run, so this catches a hook that silently failed.
+		check(dev.argon.server.Collidability.verified(), "collision rules failed their self-check");
 		check(ArgonStats.FAST_ENTITY_LOOKUPS.sum() > 0, "fast entity lookup never ran: " + dev.argon.server.ModCompat.describe());
 		check(ArgonStats.FAST_COLLISION_QUERIES.sum() > 0, "fast collision path never ran: " + dev.argon.server.ModCompat.describe());
 		check(result.startsWith("ok"), "server optimizations diverged from vanilla: " + result);
